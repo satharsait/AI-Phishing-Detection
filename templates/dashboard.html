@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - PhishGuard{% endblock %}
+{% block content %}
+
+<div class="dashboard-page pt-5 mt-4">
+    <div class="container py-4">
+
+        <!-- Welcome Header -->
+        <div class="dashboard-header mb-5">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="dashboard-title">
+                        Hello, <span class="text-gradient">{{ current_user.username }}</span> 👋
+                    </h1>
+                    <p class="text-muted mb-0">Scan URLs and stay protected from cyber threats</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('history') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-clock-rotate-left me-2"></i>View History
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card total-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <span class="stat-card-number">{{ total_scans }}</span>
+                        <span class="stat-card-label">Total Scans</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card safe-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-circle-check"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <span class="stat-card-number">{{ safe_scans }}</span>
+                        <span class="stat-card-label">Safe URLs</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="stat-card danger-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <span class="stat-card-number">{{ malicious_scans }}</span>
+                        <span class="stat-card-label">Threats Detected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanner & Chart Row -->
+        <div class="row g-4 mb-5">
+            <!-- Scanner Card -->
+            <div class="col-lg-7">
+                <div class="glass-card h-100">
+                    <div class="glass-card-header">
+                        <h5><i class="fas fa-radar me-2 text-primary"></i>URL Scanner</h5>
+                        <p class="text-muted small mb-0">Enter any URL to check if it's safe</p>
+                    </div>
+                    <div class="glass-card-body">
+                        <!-- URL Input Form -->
+                        <div class="scanner-form">
+                            <div class="url-input-wrapper">
+                                <i class="fas fa-link url-input-icon"></i>
+                                <input type="text" id="urlInput" class="form-control url-input"
+                                       placeholder="https://example.com or paste any URL here..."
+                                       autocomplete="off">
+                                <button class="btn btn-primary scan-btn" id="scanBtn" onclick="scanURL()">
+                                    <i class="fas fa-search me-2"></i>Scan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loadingState" class="text-center py-5 d-none">
+                            <div class="scan-loader">
+                                <div class="loader-ring"></div>
+                                <i class="fas fa-shield-halved loader-icon"></i>
+                            </div>
+                            <p class="mt-3 text-muted">Analyzing URL security...</p>
+                        </div>
+
+                        <!-- Result Area -->
+                        <div id="resultArea" class="d-none mt-4">
+                            <!-- Result will be injected here -->
+                        </div>
+
+                        <!-- Placeholder -->
+                        <div id="placeholderArea" class="text-center py-4">
+                            <div class="placeholder-icon">
+                                <i class="fas fa-shield-halved"></i>
+                            </div>
+                            <p class="text-muted mt-3">Enter a URL above and click Scan to analyze it</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="col-lg-5">
+                <div class="glass-card h-100">
+                    <div class="glass-card-header">
+                        <h5><i class="fas fa-chart-pie me-2 text-primary"></i>Threat Distribution</h5>
+                        <p class="text-muted small mb-0">Your scan results breakdown</p>
+                    </div>
+                    <div class="glass-card-body d-flex align-items-center justify-content-center">
+                        <div class="chart-wrapper">
+                            <canvas id="threatChart"></canvas>
+                            <div id="noDataMessage" class="text-center text-muted d-none">
+                                <i class="fas fa-chart-pie fa-3x mb-3 opacity-25"></i>
+                                <p>No scan data yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Scans -->
+        <div class="glass-card">
+            <div class="glass-card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5><i class="fas fa-clock-rotate-left me-2 text-primary"></i>Recent Scans</h5>
+                    <p class="--text-primary small mb-0">Your last 5 scanned URLs</p>
+                </div>
+                <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="glass-card-body p-0">
+                {% if recent_scans %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 modern-table">
+                            <thead>
+                                <tr>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Confidence</th>
+                                    <th>Scanned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scan in recent_scans %}
+                                <tr>
+                                    <td>
+                                        <div class="url-cell" title="{{ scan.url }}">
+                                            <i class="fas fa-link me-2 text-secondary"></i>
+                                            {{ scan.url[:50] }}{% if scan.url|length > 50 %}...{% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge-threat badge-{{ scan.prediction }}">
+                                            <i class="fas fa-{% if scan.prediction == 'benign' %}circle-check{% elif scan.prediction == 'phishing' %}fish{% elif scan.prediction == 'malware' %}bug{% else %}triangle-exclamation{% endif %} me-1"></i>
+                                            {{ scan.prediction.capitalize() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="confidence-bar-small">
+                                            <div class="cb-fill cb-{{ scan.prediction }}"
+                                                 style="width: {{ scan.confidence }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ "%.1f"|format(scan.confidence) }}%</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ scan.scanned_at.strftime('%b %d, %H:%M') }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                        <p>No scans yet. Start by scanning a URL above!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─── Threat Chart ────────────────────────────────────────────
+async function loadThreatChart() {
+    try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        const total = Object.values(data).reduce((a, b) => a + b, 0);
+
+        if (total === 0) {
+            document.getElementById('noDataMessage').classList.remove('d-none');
+            return;
+        }
+
+        const ctx = document.getElementById('threatChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Benign', 'Defacement', 'Phishing', 'Malware'],
+                datasets: [{
+                    data: [data.benign, data.defacement, data.phishing, data.malware],
+                    backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#94a3b8',
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error('Chart error:', e);
+    }
+}
+
+// ─── URL Scanner ─────────────────────────────────────────────
+async function scanURL() {
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        urlInput.classList.add('is-invalid');
+        setTimeout(() => urlInput.classList.remove('is-invalid'), 2000);
+        return;
+    }
+
+    // Show loading
+    document.getElementById('placeholderArea').classList.add('d-none');
+    document.getElementById('resultArea').classList.add('d-none');
+    document.getElementById('loadingState').classList.remove('d-none');
+    document.getElementById('scanBtn').disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('url', url);
+
+        const res = await fetch('/scan', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        displayResult(data);
+    } catch (error) {
+        showScanError(error.message);
+    } finally {
+        document.getElementById('loadingState').classList.add('d-none');
+        document.getElementById('scanBtn').disabled = false;
+    }
+}
+
+function displayResult(data) {
+    const resultArea = document.getElementById('resultArea');
+    const pred = data.prediction;
+    const conf = data.confidence.toFixed(1);
+    const probs = data.probabilities;
+
+    const icons = {
+        benign: 'circle-check',
+        phishing: 'fish',
+        malware: 'bug',
+        defacement: 'triangle-exclamation'
+    };
+
+    const messages = {
+        benign: 'This URL appears to be safe.',
+        phishing: 'Warning! This URL may be a phishing site.',
+        malware: 'Danger! This URL may contain malware.',
+        defacement: 'Caution! This URL may be a defaced website.'
+    };
+
+    resultArea.innerHTML = `
+        <div class="result-card result-${pred}">
+            <div class="result-header">
+                <div class="result-icon-wrap">
+                    <i class="fas fa-${icons[pred]} result-icon"></i>
+                </div>
+                <div>
+                    <h4 class="result-title">${pred.charAt(0).toUpperCase() + pred.slice(1)}</h4>
+                    <p class="result-message mb-0">${messages[pred]}</p>
+                </div>
+                <div class="ms-auto">
+                    <div class="confidence-badge">${conf}%</div>
+                    <small class="text-muted d-block text-center">Confidence</small>
+                </div>
+            </div>
+
+            <div class="result-url">
+                <i class="fas fa-link me-2 text-muted"></i>
+                <small class="text-break">${data.url}</small>
+            </div>
+
+            <div class="prob-bars mt-3">
+                ${Object.entries(probs).map(([label, val]) => `
+                    <div class="prob-row">
+                        <span class="prob-label">${label.charAt(0).toUpperCase() + label.slice(1)}</span>
+                        <div class="prob-track">
+                            <div class="prob-fill prob-${label}" style="width: ${val.toFixed(1)}%"></div>
+                        </div>
+                        <span class="prob-value">${val.toFixed(1)}%</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    resultArea.classList.remove('d-none');
+}
+
+function showScanError(msg) {
+    const resultArea = document.getElementById('resultArea');
+    resultArea.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="fas fa-circle-xmark me-2"></i>
+            <strong>Error:</strong> ${msg}
+        </div>
+    `;
+    resultArea.classList.remove('d-none');
+}
+
+// Allow Enter key to trigger scan
+document.getElementById('urlInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') scanURL();
+});
+
+// Load chart on page load
+loadThreatChart();
+</script>
+{% endblock %}

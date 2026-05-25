@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}PhishGuard - URL Security Scanner{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg">
+        <div class="hero-circle c1"></div>
+        <div class="hero-circle c2"></div>
+        <div class="hero-circle c3"></div>
+    </div>
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="hero-badge mb-4">
+                    <i class="fas fa-bolt me-2"></i>
+                    AI-Powered URL Analysis
+                </div>
+                <h1 class="hero-title">
+                    Stay Safe from
+                    <span class="text-gradient">Phishing</span>
+                    Attacks
+                </h1>
+                <p class="hero-subtitle">
+                    PhishGuard uses advanced machine learning to instantly detect malicious URLs,
+                    phishing sites, malware, and web defacement — keeping you one step ahead of cybercriminals.
+                </p>
+                <div class="hero-actions">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-gauge-high me-2"></i>Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-rocket me-2"></i>Start for Free
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-right-to-bracket me-2"></i>Login
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Stats Row -->
+                <div class="hero-stats mt-5">
+                    <div class="hero-stat">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">Threat Types</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="stat-number">99%</span>
+                        <span class="stat-label">Accuracy</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="stat-number">&lt;1s</span>
+                        <span class="stat-label">Scan Time</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-visual">
+                    <div class="scanner-card">
+                        <div class="scanner-header">
+                            <div class="scanner-dot red"></div>
+                            <div class="scanner-dot yellow"></div>
+                            <div class="scanner-dot green"></div>
+                            <span class="ms-3 text-muted small">URL Scanner</span>
+                        </div>
+                        <div class="scanner-body">
+                            <div class="scan-animation">
+                                <i class="fas fa-shield-halved scanner-icon"></i>
+                                <div class="scan-rings">
+                                    <div class="ring r1"></div>
+                                    <div class="ring r2"></div>
+                                    <div class="ring r3"></div>
+                                </div>
+                            </div>
+                            <div class="scan-result safe">
+                                <i class="fas fa-circle-check me-2"></i>
+                                URL is Safe
+                            </div>
+                            <div class="scan-bars mt-3">
+                                <div class="scan-bar-item">
+                                    <span>Benign</span>
+                                    <div class="scan-bar-track">
+                                        <div class="scan-bar-fill safe-fill" style="width: 92%"></div>
+                                    </div>
+                                    <span>92%</span>
+                                </div>
+                                <div class="scan-bar-item">
+                                    <span>Phishing</span>
+                                    <div class="scan-bar-track">
+                                        <div class="scan-bar-fill danger-fill" style="width: 3%"></div>
+                                    </div>
+                                    <span>3%</span>
+                                </div>
+                                <div class="scan-bar-item">
+                                    <span>Malware</span>
+                                    <div class="scan-bar-track">
+                                        <div class="scan-bar-fill warning-fill" style="width: 5%"></div>
+                                    </div>
+                                    <span>5%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">How PhishGuard Protects You</h2>
+            <p class="section-subtitle">Our AI analyzes 21 URL features to detect threats instantly</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon phishing-icon">
+                        <i class="fas fa-fish"></i>
+                    </div>
+                    <h5>Phishing Detection</h5>
+                    <p>Identifies deceptive sites designed to steal your credentials and personal information.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon malware-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h5>Malware Detection</h5>
+                    <p>Detects URLs leading to malware, ransomware, and other malicious software downloads.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon defacement-icon">
+                        <i class="fas fa-triangle-exclamation"></i>
+                    </div>
+                    <h5>Defacement Detection</h5>
+                    <p>Spots compromised websites that have been altered by attackers to spread misinformation.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon safe-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h5>Safe URL Verification</h5>
+                    <p>Confirms legitimate URLs so you can browse with complete confidence and peace of mind.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="cta-card text-center">
+            <div class="cta-icon mb-4">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <h2>Ready to Stay Protected?</h2>
+            <p class="lead mb-4">Create your free account and start scanning URLs instantly.</p>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-user-plus me-2"></i>Create Free Account
+                </a>
+            {% else %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-gauge-high me-2"></i>Go to Dashboard
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

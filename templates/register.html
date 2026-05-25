@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Register - PhishGuard{% endblock %}
+{% block content %}
+
+<div class="auth-page">
+    <div class="auth-bg">
+        <div class="hero-circle c1"></div>
+        <div class="hero-circle c2"></div>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-6 col-lg-5">
+                <div class="auth-card">
+                    <!-- Header -->
+                    <div class="auth-header text-center">
+                        <div class="auth-logo">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <h2>Create Account</h2>
+                        <p class="text-muted">Join PhishGuard and stay protected</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form method="POST" class="auth-form" id="registerForm" novalidate>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-user me-2 text-primary"></i>Username
+                                </label>
+                                <input type="text" name="username" class="form-control form-control-lg"
+                                       placeholder="johndoe" required minlength="3" autocomplete="username">
+                                <div class="invalid-feedback">Username must be at least 3 characters.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                                </label>
+                                <input type="email" name="email" class="form-control form-control-lg"
+                                       placeholder="you@example.com" required autocomplete="email">
+                                <div class="invalid-feedback">Please enter a valid email.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-lock me-2 text-primary"></i>Password
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="password" id="password"
+                                           class="form-control form-control-lg"
+                                           placeholder="Min. 6 characters" required minlength="6"
+                                           autocomplete="new-password" oninput="checkPasswordStrength(this.value)">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="togglePassword('password', 'eyeIcon1')">
+                                        <i class="fas fa-eye" id="eyeIcon1"></i>
+                                    </button>
+                                </div>
+                                <!-- Password Strength -->
+                                <div class="password-strength mt-2">
+                                    <div class="strength-bar">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <small class="strength-text" id="strengthText"></small>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">
+                                    <i class="fas fa-lock-open me-2 text-primary"></i>Confirm Password
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" name="confirm_password" id="confirm_password"
+                                           class="form-control form-control-lg"
+                                           placeholder="Repeat your password" required
+                                           autocomplete="new-password">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="togglePassword('confirm_password', 'eyeIcon2')">
+                                        <i class="fas fa-eye" id="eyeIcon2"></i>
+                                    </button>
+                                </div>
+                                <div class="match-indicator mt-1" id="matchIndicator"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-check my-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label text-muted" for="terms">
+                                I agree to the <a href="#" class="auth-link">Terms of Service</a>
+                                and <a href="#" class="auth-link">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+
+                    <div class="auth-footer text-center mt-4">
+                        <p class="text-muted mb-0">
+                            Already have an account?
+                            <a href="{{ url_for('login') }}" class="auth-link">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

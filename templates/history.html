@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Scan History - PhishGuard{% endblock %}
+{% block content %}
+
+<div class="dashboard-page pt-5 mt-4">
+    <div class="container py-4">
+
+        <!-- Header -->
+        <div class="dashboard-header mb-5">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="dashboard-title">
+                        <i class="fas fa-clock-rotate-left me-3 text-primary"></i>
+                        Scan <span class="text-gradient">History</span>
+                    </h1>
+                    <p class="text-muted mb-0">All your URL scan results</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-gauge-high me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs mb-4">
+            <a href="{{ url_for('history', filter='all') }}"
+               class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+                <i class="fas fa-list me-2"></i>All
+            </a>
+            <a href="{{ url_for('history', filter='benign') }}"
+               class="filter-tab tab-benign {% if filter_type == 'benign' %}active{% endif %}">
+                <i class="fas fa-circle-check me-2"></i>Safe
+            </a>
+            <a href="{{ url_for('history', filter='phishing') }}"
+               class="filter-tab tab-phishing {% if filter_type == 'phishing' %}active{% endif %}">
+                <i class="fas fa-fish me-2"></i>Phishing
+            </a>
+            <a href="{{ url_for('history', filter='malware') }}"
+               class="filter-tab tab-malware {% if filter_type == 'malware' %}active{% endif %}">
+                <i class="fas fa-bug me-2"></i>Malware
+            </a>
+            <a href="{{ url_for('history', filter='defacement') }}"
+               class="filter-tab tab-defacement {% if filter_type == 'defacement' %}active{% endif %}">
+                <i class="fas fa-triangle-exclamation me-2"></i>Defacement
+            </a>
+        </div>
+
+        <!-- Table -->
+        <div class="glass-card">
+            <div class="glass-card-body p-0">
+                {% if scans.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 modern-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>URL</th>
+                                    <th>Status</th>
+                                    <th>Confidence</th>
+                                    <th>Probabilities</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scan in scans.items %}
+                                <tr id="row-{{ scan.id }}">
+                                    <td class="text-muted">{{ loop.index + (scans.page - 1) * 10 }}</td>
+                                    <td>
+                                        <div class="url-cell" title="{{ scan.url }}">
+                                            <i class="fas fa-link me-2 text-muted"></i>
+                                            <a href="{{ scan.url }}" target="_blank" class="url-link"
+                                               rel="noopener noreferrer">
+                                                {{ scan.url[:60] }}{% if scan.url|length > 60 %}...{% endif %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge-threat badge-{{ scan.prediction }}">
+                                            <i class="fas fa-{% if scan.prediction == 'benign' %}circle-check{% elif scan.prediction == 'phishing' %}fish{% elif scan.prediction == 'malware' %}bug{% else %}triangle-exclamation{% endif %} me-1"></i>
+                                            {{ scan.prediction.capitalize() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ "%.1f"|format(scan.confidence) }}%</strong>
+                                    </td>
+                                    <td>
+                                        <div class="mini-probs">
+                                            <span class="mini-prob benign" title="Benign">
+                                                B: {{ "%.0f"|format(scan.benign_prob) }}%
+                                            </span>
+                                            <span class="mini-prob phishing" title="Phishing">
+                                                P: {{ "%.0f"|format(scan.phishing_prob) }}%
+                                            </span>
+                                            <span class="mini-prob malware" title="Malware">
+                                                M: {{ "%.0f"|format(scan.malware_prob) }}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ scan.scanned_at.strftime('%b %d, %Y') }}<br>
+                                            {{ scan.scanned_at.strftime('%H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn"
+                                                onclick="deleteScan({{ scan.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if scans.pages > 1 %}
+                    <div class="d-flex justify-content-center p-4">
+                        <nav>
+                            <ul class="pagination pagination-modern">
+                                {% if scans.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('history', page=scans.prev_num, filter=filter_type) }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for page_num in scans.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                                    {% if page_num %}
+                                        <li class="page-item {% if page_num == scans.page %}active{% endif %}">
+                                            <a class="page-link" href="{{ url_for('history', page=page_num, filter=filter_type) }}">
+                                                {{ page_num }}
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if scans.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('history', page=scans.next_num, filter=filter_type) }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                        <p>No scans found for this filter.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-search me-2"></i>Start Scanning
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function deleteScan(scanId) {
+    if (!confirm('Delete this scan record?')) return;
+
+    try {
+        const res = await fetch(`/delete_scan/${scanId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            const row = document.getElementById(`row-${scanId}`);
+            row.style.animation = 'fadeOut 0.3s ease forwards';
+            setTimeout(() => row.remove(), 300);
+        }
+    } catch (e) {
+        alert('Error deleting scan.');
+    }
+}
+</script>
+{% endblock %}
